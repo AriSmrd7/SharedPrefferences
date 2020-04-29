@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.arismrd.ngasuh.utils.Preferences;
 import com.arismrd.ngasuh.model.UserModel;
 
-
 /*
 
 NIM    :  10117162
@@ -21,106 +20,90 @@ KELAS  :  IF-4
 
  */
 
-public class MainActivity extends AppCompatActivity {
+public class Register extends AppCompatActivity {
 
     private TextView txtMasuk;
-    private TextView txtRegister;
-    private EditText edtUsername;
-    private EditText edtPassword;
+    private EditText edtUserName;
+    private EditText edtPassWord;
+    private EditText edtRePassWord;
+    private EditText edtPhoneNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_register);
 
         declareView();
-
         txtMasuk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                validasiLogin();
+                validasiRegister();
             }
         });
 
-        txtRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(getBaseContext(), Register.class));
-            }
-        });
     }
-
-    /**
-     * ke MainActivity jika data Status Login dari Data Preferences bernilai true
-     */
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (Preferences.getLoggedInStatus(getBaseContext())) {
-            startActivity(new Intent(getBaseContext(), Home.class));
-            finish();
-        }
-    }
-
 
     private void declareView() {
-
-        txtRegister = findViewById(R.id.txt_login_register);
-        txtMasuk = findViewById(R.id.txt_login_masuk);
-        edtUsername = findViewById(R.id.edt_login_username);
-        edtPassword = findViewById(R.id.edt_login_password);
-
+        txtMasuk = findViewById(R.id.txt_reg_masuk);
+        edtUserName = findViewById(R.id.edt_reg_username);
+        edtPassWord = findViewById(R.id.edt_reg_password);
+        edtRePassWord = findViewById(R.id.edt_reg_password_confirm);
+        edtPhoneNumber = findViewById(R.id.edt_reg_phone);
     }
 
-    private void validasiLogin() {
+    private void validasiRegister(){
 
         // Mereset semua Error dan fokus menjadi default
-        edtUsername.setError(null);
-        edtPassword.setError(null);
+        edtUserName.setError(null);
+        edtPassWord.setError(null);
+        edtRePassWord.setError(null);
         View fokus = null;
         boolean cancel = false;
 
         //Set Input Value dari View
-        String userName = edtUsername.getText().toString();
-        String password = edtPassword.getText().toString();
+        String userName = edtUserName.getText().toString();
+        String password = edtPassWord.getText().toString();
+        String rePassword = edtRePassWord.getText().toString();
+        String phoneNumber = edtPhoneNumber.getText().toString();
 
 
         // Jika form user kosong atau memenuhi kriteria di Method cekUser() maka, Set error di Form-
         // User dengan menset variable fokus dan error di Viewnya juga cancel menjadi true*/
-        if (TextUtils.isEmpty(userName)) {
-            edtUsername.setError("Harus diisi");
-            fokus = edtUsername;
+        if (TextUtils.isEmpty(userName)){
+            edtUserName.setError("Harus diisi");
+            fokus = edtUserName;
             cancel = true;
-        } else if (!cekUser(userName)) {
-            edtUsername.setError("Username Tidak Ditemukan");
-            fokus = edtUsername;
+        }else if(cekUser(userName)){
+            edtUserName.setError("Username sudah terdaftar");
+            fokus = edtUserName;
             cancel = true;
         }
 
         // Jika form password kosong dan memenuhi kriteria di Method cekPassword maka,
         // Reaksinya sama dengan percabangan User di atas. Bedanya untuk Password dan Repassword*/
-        if (TextUtils.isEmpty(password)) {
-            edtPassword.setError("Harus Diisi");
-            fokus = edtPassword;
+        if (TextUtils.isEmpty(password)){
+            edtPassWord.setError("Harus Diisi");
+            fokus = edtPassWord;
             cancel = true;
-        } else if (!cekPassword(password)) {
-            edtPassword.setError("Data yang dimasukkan tidak sesuai");
-            fokus = edtPassword;
+        }else if (!cekPassword(password,rePassword)){
+            edtPassWord.setError("Password yang dimasukkan tidak sesuai");
+            fokus = edtPassWord;
             cancel = true;
         }
 
         // Jika cancel true, variable fokus mendapatkan fokus. Jika false, maka
         // Kembali ke LoginActivity dan Set User dan Password untuk data yang terdaftar */
-        if (cancel) {
+        if (cancel){
             fokus.requestFocus();
-        } else {
-            // Deklarasi Model
+        }else{
+// Deklarasi Model
             UserModel userModel = new UserModel();
             userModel.setUsername(userName);
             userModel.setPassword(password);
+            userModel.setPhone(phoneNumber);
             // Simpan data ke shared preferences
-            Preferences.setUserPreferences(getBaseContext(), userModel);
-            Preferences.setLoggedInStatus(getBaseContext(), true);
+            Preferences.setUserPreferences(getBaseContext(),userModel);
+            Preferences.setLoggedInStatus(getBaseContext(),true);
             //Pindah Halaman ke home
             startActivity(new Intent(getBaseContext(), Home.class));
             finish();
@@ -128,16 +111,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     // True jika parameter user sama dengan data user yang terdaftar dari Preferences */
-    private boolean cekUser(String user) {
+    private boolean cekUser(String user){
         return user.equals(Preferences.getRegisteredUser(getBaseContext()));
     }
 
     // True jika parameter password sama dengan parameter repassword */
-    private boolean cekPassword(String password) {
-        return password.equals(Preferences.getRegisteredPassword(getBaseContext()));
+    private boolean cekPassword(String password, String repassword){
+        return password.equals(repassword);
     }
 
-
 }
-
